@@ -1,13 +1,22 @@
-FROM node:22.5.1-bullseye-slim
-
-WORKDIR /usr/src/app
-
+FROM node:22.5.1-bullseye-slim as base
+WORKDIR /app
 COPY package*.json ./
-
 RUN npm install
-
 COPY . .
 
-EXPOSE 3000
+FROM base as frontend-build
+WORKDIR /app/client
+RUN npm install
+RUN npm run build
 
-CMD ["node", "app.js"]
+FROM base as backend-build
+RUN npm run build
+
+FROM node:22.5.1-bullseye-slim
+WORKDIR /app
+COPY --from=backend-build /app/dist ./dist
+COPY --from=backend-build /app/package*.json ./
+COPY --from=frontend-build /app/client/build ./client/build
+RUN npm install --only=production
+EXPOSE 5000
+CMD ["node", "dist/app.js"]

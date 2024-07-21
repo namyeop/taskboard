@@ -1,19 +1,14 @@
-# Node.js
 node_modules/
+client/node_modules
+client/build
 npm-debug.log
 yarn-error.log
 
-# React
 build/
 dist/
 *.env
 
-# IDE/Editor specific
 .vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
 
-# OS specific
 .DS_Store
 Thumbs.db
