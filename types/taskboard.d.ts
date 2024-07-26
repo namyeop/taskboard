@@ -1,8 +1,9 @@
 export type ColumnId = "todo" | "inProgress" | "done";
 
 export interface Task {
-	id: string;
+	uuid: string;
 	taskText: string;
+	status: ColumnId;
 }
 
 export interface Tasks {

@@ -7,9 +7,9 @@
   ],
   "compilerOptions": {
     "paths": {
-      "@types/taskboard": [
-        "/types"
-      ],
+      "@types-taskboard/*": [
+        "./types/*"
+      ]
     },
     /* Visit https://aka.ms/tsconfig to read more about this file */
     /* Projects */
