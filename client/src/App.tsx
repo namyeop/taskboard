@@ -1,11 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./App.css";
-
-type ColumnId = "todo" | "inProgress" | "done";
-
-interface Tasks {
-	[key: string]: string[];
-}
+import { io } from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
+import { Task, ColumnId, Tasks } from "@types/taskboard";
 
 function App() {
 	const [tasks, setTasks] = useState<Tasks>({
@@ -14,23 +11,37 @@ function App() {
 		done: [],
 	});
 
-	const draggedTask = useRef<{ task: string; sourceColumn: ColumnId } | null>(
+	useEffect(() => {
+		const socket = io();
+
+		socket.on("connect", () => {});
+
+		return () => {
+			socket.disconnect();
+		};
+	}, []);
+
+	const draggedTask = useRef<{ task: Task; sourceColumn: ColumnId } | null>(
 		null,
 	);
 
 	const addTask = (columnId: ColumnId): void => {
 		const taskText = prompt("Enter task description:");
 		if (taskText) {
+			const socket = io();
+			const newTask = { id: uuidv4(), taskText };
 			setTasks((prevTasks) => ({
 				...prevTasks,
-				[columnId]: [...prevTasks[columnId], taskText],
+				[columnId]: [...prevTasks[columnId], newTask],
 			}));
+
+			socket.emit("addTask", { taskText, columnId });
 		}
 	};
 
 	const onDragStart = (
 		e: React.DragEvent<HTMLDivElement>,
-		task: string,
+		task: Task,
 		sourceColumn: ColumnId,
 	): void => {
 		draggedTask.current = { task, sourceColumn };
@@ -53,14 +64,25 @@ function App() {
 		if (draggedTask.current) {
 			const { task, sourceColumn } = draggedTask.current;
 			if (sourceColumn !== targetColumn) {
+				const socket = io();
 				setTasks((prevTasks) => ({
 					...prevTasks,
-					[sourceColumn]: prevTasks[sourceColumn].filter((t) => t !== task),
+					[sourceColumn]: prevTasks[sourceColumn].filter(
+						(t) => t.id !== task.id,
+					),
 					[targetColumn]: [...prevTasks[targetColumn], task],
 				}));
+				socket.emit("moveTask", { task, sourceColumn, targetColumn });
 			}
 			draggedTask.current = null;
 		}
+	};
+
+	const deleteTask = (task: Task, columnId: ColumnId) => {
+		setTasks((prevTasks) => ({
+			...prevTasks,
+			[columnId]: prevTasks[columnId].filter((t) => t.id !== task.id),
+		}));
 	};
 
 	const renderColumn = (columnId: ColumnId, title: string) => (
@@ -76,7 +98,12 @@ function App() {
 					draggable
 					onDragStart={(e) => onDragStart(e, task, columnId)}
 					onDragEnd={onDragEnd}>
-					{task}
+					<span>{task.taskText}</span>
+					<button
+						onClick={() => deleteTask(task, columnId)}
+						className="bg-red-500 text-white px-2 py-1 rounded ml-2">
+						Delete
+					</button>
 				</div>
 			))}
 			<button
