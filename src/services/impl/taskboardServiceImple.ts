@@ -1,6 +1,8 @@
-import TaskBoardRepository from "../repositories/taskboard.repository";
+import { TaskBoardService } from "../taskboardService";
+import TaskBoardRepository from "../../repositories/taskboard.repository";
 import { Task } from "@types-taskboard/taskboard";
-export class TaskBoardService {
+
+export class TaskBoardServiceImpl implements TaskBoardService {
 	private taskBoardRepository: TaskBoardRepository;
 
 	constructor() {

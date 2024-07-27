@@ -1,20 +1,11 @@
 import sqlite3 from "sqlite3";
+import Database from "../databases/database";
 
 export default class TaskBoardRepository {
 	private db: sqlite3.Database;
 
 	constructor() {
-		this.db = new sqlite3.Database(":memory:");
-		this.initializeDatabase();
-	}
-
-	private initializeDatabase() {
-		this.db.serialize(() => {
-			this.db.run(
-				"CREATE TABLE taskboard (id INTEGER PRIMARY KEY AUTOINCREMENT, uuid TEXT, taskText TEXT, status TEXT)",
-			);
-			this.db.run("CREATE INDEX idx_uuid ON taskboard (uuid)");
-		});
+		this.db = Database.getInstance();
 	}
 
 	public createTask(
