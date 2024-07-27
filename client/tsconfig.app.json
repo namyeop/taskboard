@@ -23,10 +23,15 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@types-taskboard/*": [
+        "../types/*"
+      ]
+    }
   },
   "include": [
     "src",
-    "../types/index.ts"
   ]
 }
