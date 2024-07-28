@@ -1,42 +1,63 @@
 import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { Task, ColumnId, Tasks, ColumnIds } from "@types-taskboard/taskboard";
+import { Task, ColumnId, Tasks, ColumnIds } from "../../../types/taskboard";
 import SignIn from "./signIn";
 
 const TaskBoard: React.FC = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 	const [tasks, setTasks] = useState<Tasks>({
-		todo: [],
-		inProgress: [],
-		done: [],
+		[ColumnIds.TODO]: [],
+		[ColumnIds.IN_PROGRESS]: [],
+		[ColumnIds.DONE]: [],
 	});
 
-	useEffect(() => {
-		const socket = io();
+	const socketRef = useRef(null);
+	const draggedTask = useRef<{ task: Task; sourceColumn: ColumnId } | null>(
+		null,
+	);
 
-		socket.on("connect", () => {});
+	useEffect(() => {
+		const socket = io("http://localhost:3000");
+		socketRef.current = socket;
+
+		socket.on("connect", () => {
+			console.log("Connected to server");
+		});
+
+		axios.get("http://localhost:3000").then((res) => {
+			console.log(res.data);
+			if (res.data.length > 0) {
+				const tasksByStatus: { [key: string]: Task[] } = {};
+				res.data.forEach((task: Task) => {
+					if (tasksByStatus[task.status]) {
+						tasksByStatus[task.status].push(task);
+					}
+				});
+				setTasks(tasksByStatus);
+			}
+		});
 
 		return () => {
 			socket.disconnect();
 		};
 	}, []);
 
-	const draggedTask = useRef<{ task: Task; sourceColumn: ColumnId } | null>(
-		null,
-	);
-
 	const addTask = (columnId: ColumnId): void => {
 		const taskText = prompt("Enter task description:");
 		if (taskText) {
-			const socket = io();
 			const uuid = uuidv4();
 			const newTask = { uuid, taskText, status: columnId };
 			setTasks((prevTasks) => ({
 				...prevTasks,
 				[columnId]: [...prevTasks[columnId], newTask],
 			}));
-			socket.emit("addTask", { uuid, taskText, columnId });
+			socketRef.current.emit("createTask", {
+				uuid,
+				taskText,
+				status: columnId,
+			});
 		}
 	};
 
@@ -45,6 +66,9 @@ const TaskBoard: React.FC = () => {
 			...prevTasks,
 			[columnId]: prevTasks[columnId].filter((t) => t.uuid !== task.uuid),
 		}));
+		socketRef.current.emit("deleteTask", {
+			uuid: task.uuid,
+		});
 	};
 
 	const onDragStart = (
@@ -72,7 +96,6 @@ const TaskBoard: React.FC = () => {
 		if (draggedTask.current) {
 			const { task, sourceColumn } = draggedTask.current;
 			if (sourceColumn !== targetColumn) {
-				const socket = io();
 				setTasks((prevTasks) => ({
 					...prevTasks,
 					[sourceColumn]: prevTasks[sourceColumn].filter(
@@ -80,7 +103,10 @@ const TaskBoard: React.FC = () => {
 					),
 					[targetColumn]: [...prevTasks[targetColumn], task],
 				}));
-				socket.emit("moveTask", { task, sourceColumn, targetColumn });
+				socketRef.current.emit("updateTask", {
+					uuid: task.uuid,
+					status: targetColumn,
+				});
 			}
 			draggedTask.current = null;
 		}
@@ -92,21 +118,22 @@ const TaskBoard: React.FC = () => {
 			onDragOver={onDragOver}
 			onDrop={(e) => onDrop(e, columnId)}>
 			<h2 className="text-xl font-bold mb-4">{title}</h2>
-			{tasks[columnId].map((task, index) => (
-				<div
-					key={index}
-					className="bg-gray-700 p-2 rounded cursor-move"
-					draggable
-					onDragStart={(e) => onDragStart(e, task, columnId)}
-					onDragEnd={onDragEnd}>
-					<span>{task.taskText}</span>
-					<button
-						onClick={() => deleteTask(task, columnId)}
-						className="bg-red-500 text-white px-2 py-1 rounded ml-2">
-						Delete
-					</button>
-				</div>
-			))}
+			{tasks[columnId] &&
+				tasks[columnId].map((task, index) => (
+					<div
+						key={index}
+						className="bg-gray-700 p-2 rounded cursor-move"
+						draggable
+						onDragStart={(e) => onDragStart(e, task, columnId)}
+						onDragEnd={onDragEnd}>
+						<span>{task.taskText}</span>
+						<button
+							onClick={() => deleteTask(task, columnId)}
+							className="bg-red-500 text-white px-2 py-1 rounded ml-2">
+							Delete
+						</button>
+					</div>
+				))}
 			<button
 				onClick={() => addTask(columnId)}
 				className="bg-blue-500 text-white px-4 py-2 rounded mt-2">
@@ -123,9 +150,9 @@ const TaskBoard: React.FC = () => {
 		<div className="max-w-6xl mx-auto">
 			<h1 className="text-3xl font-semibold mb-6">Taskboard</h1>
 			<div id="taskboard" className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				{renderColumn("todo", "To Do")}
-				{renderColumn("inProgress", "In Progress")}
-				{renderColumn("done", "Done")}
+				{renderColumn(ColumnIds.TODO, "To Do")}
+				{renderColumn(ColumnIds.IN_PROGRESS, "In Progress")}
+				{renderColumn(ColumnIds.DONE, "Done")}
 			</div>
 		</div>
 	);
