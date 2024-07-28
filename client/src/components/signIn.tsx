@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 interface SignInProps {
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -18,7 +19,18 @@ const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setIsLoggedIn(true);
+
+		axios
+			.post("http://localhost:3000/login", {
+				username,
+				password,
+			})
+			.then((res) => {
+				if (res.status === 200) {
+					alert("로그인 성공!");
+				}
+				setIsLoggedIn(true);
+			});
 	};
 
 	return (
