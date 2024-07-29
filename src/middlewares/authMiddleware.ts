@@ -41,8 +41,15 @@ export const refreshToken = (req: Request, res: Response) => {
 			const token = jwt.sign({ username: user.username }, jwtSecret, {
 				expiresIn: "1h",
 			});
+			const refreshToken = jwt.sign(
+				{ username: user.username },
+				jwtRefreshSecret,
+				{
+					expiresIn: "7d",
+				},
+			);
 
-			res.json({ token });
+			res.json({ token, refreshToken });
 		},
 	);
 };
