@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { jwtConfig } from "../config/config";
 
-const jwtSecret = process.env.JWT_SECRET || "secret";
-const jwtRefreshSecret = process.env.JWT_REFRESH || "refresh";
+const jwtSecret = jwtConfig.jwtSecret;
+const jwtRefreshSecret = jwtConfig.jwtRefreshSecret;
 
 export const verifyToken = (
 	req: Request,
