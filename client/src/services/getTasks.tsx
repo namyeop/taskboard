@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../utils/axiosConfig";
 import { Task } from "../types";
 
 const refreshToken = () => {
@@ -20,31 +20,6 @@ const refreshToken = () => {
 };
 
 const getTasks = async (setTasks: React.SetStateAction) => {
-	axios.interceptors.request.use(
-		(config) => {
-			const token = localStorage.getItem("token");
-			if (token) {
-				config.headers.Authorization = `Bearer ${token}`;
-			}
-			return config;
-		},
-		(error) => {
-			return Promise.reject(error);
-		},
-	);
-
-	axios.interceptors.response.use(
-		(response) => {
-			return response;
-		},
-		(error) => {
-			if (error.response.status === 401) {
-				refreshToken();
-			}
-			return Promise.reject(error);
-		},
-	);
-
 	try {
 		const res = await axios.get("http://localhost:3000");
 		if (res.data.length > 0) {

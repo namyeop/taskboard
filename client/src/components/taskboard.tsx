@@ -136,7 +136,7 @@ const TaskBoard: React.FC = () => {
 	}
 
 	return (
-		<div className="max-w-6xl mx-auto">
+		<div data-testid="taskboard" className="max-w-6xl mx-auto">
 			<h1 className="text-3xl font-semibold mb-6">Taskboard</h1>
 			<div id="taskboard" className="grid grid-cols-1 md:grid-cols-3 gap-6">
 				{renderColumn(ColumnIds.TODO, "To Do")}
