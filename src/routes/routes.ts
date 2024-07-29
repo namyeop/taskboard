@@ -5,7 +5,7 @@ import { TaskBoardController } from "../controllers/taskboardController";
 import { UserController } from "../controllers/userController";
 import UserRepository from "../repositories/user.repository";
 import TaskBoardRepository from "../repositories/taskboard.repository";
-import { verifyToken } from "../middlewares/authMiddleware";
+import { refreshToken, verifyToken } from "../middlewares/authMiddleware";
 
 const createRouter = (server: http.Server) => {
 	const router = Router();
@@ -26,6 +26,7 @@ const createRouter = (server: http.Server) => {
 	);
 	router.post("/signup", userController.createUser.bind(userController));
 	router.post("/login", userController.loginUser.bind(userController));
+	router.post("/refreshToken", refreshToken);
 
 	return router;
 };

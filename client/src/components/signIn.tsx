@@ -28,7 +28,9 @@ const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
 			.then((res) => {
 				if (res.status === 200) {
 					const token = res.data.token;
+					const refreshToken = res.data.refreshToken;
 					localStorage.setItem("token", token);
+					localStorage.setItem("refreshToken", refreshToken);
 					alert("로그인 성공!");
 				}
 				setIsLoggedIn(true);

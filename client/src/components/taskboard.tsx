@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { Task, ColumnId, Tasks, ColumnIds } from "../../../types/taskboard";
 import SignIn from "./signIn";
+import getTasks from "../services/getTasks";
 
 const TaskBoard: React.FC = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -26,27 +26,7 @@ const TaskBoard: React.FC = () => {
 			console.log("Connected to server");
 		});
 
-		axios
-			.get("http://localhost:3000", {
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem("token")}`,
-				},
-			})
-			.then((res) => {
-				console.log(res.data);
-				if (res.data.length > 0) {
-					const tasksByStatus: { [key: string]: Task[] } = {};
-					res.data.forEach((task: Task) => {
-						if (tasksByStatus[task.status]) {
-							tasksByStatus[task.status].push(task);
-						}
-					});
-					setTasks(tasksByStatus);
-				}
-			})
-			.catch((error) => {
-				alert("로그인이 필요합니다." + error);
-			});
+		getTasks(setTasks);
 
 		return () => {
 			socket.disconnect();

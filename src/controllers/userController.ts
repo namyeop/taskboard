@@ -5,10 +5,16 @@ import UserRepository from "../repositories/user.repository";
 export class UserController {
 	private userService: UserServiceImpl;
 	private jwtSecret: string;
+	private jwtRefreshSecret: string;
 
 	constructor(userRepository: UserRepository) {
 		this.jwtSecret = process.env.JWT_SECRET || "secret";
-		this.userService = new UserServiceImpl(userRepository, this.jwtSecret);
+		this.jwtRefreshSecret = process.env.JWT_REFRESH || "refresh";
+		this.userService = new UserServiceImpl(
+			userRepository,
+			this.jwtSecret,
+			this.jwtRefreshSecret,
+		);
 	}
 
 	async createUser(req: Request, res: Response) {
