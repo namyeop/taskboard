@@ -5,8 +5,8 @@ import Database from "../databases/database";
 export default class UserRepository {
 	private db: sqlite3.Database;
 
-	constructor() {
-		this.db = Database.getInstance();
+	constructor(db: sqlite3.Database) {
+		this.db = db;
 	}
 
 	public registerUser(username: string, password: string): Promise<void> {

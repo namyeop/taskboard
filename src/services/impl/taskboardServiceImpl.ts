@@ -1,6 +1,5 @@
 import http from "http";
 import { Server, Socket } from "socket.io";
-import Database from "../../databases/database";
 import { ColumnId, Task } from "@types-taskboard/taskboard";
 import { ITaskBoardService } from "../ItaskboardService";
 import TaskBoardRepository from "../../repositories/taskboard.repository";

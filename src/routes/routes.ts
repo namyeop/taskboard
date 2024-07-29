@@ -6,12 +6,13 @@ import { UserController } from "../controllers/userController";
 import UserRepository from "../repositories/user.repository";
 import TaskBoardRepository from "../repositories/taskboard.repository";
 import { refreshToken, verifyToken } from "../middlewares/authMiddleware";
+import * as sqlite3 from "sqlite3";
 
-const createRouter = (server: http.Server) => {
+const createRouter = (server: http.Server, db: sqlite3.Database) => {
 	const router = Router();
 
-	const userRepository = new UserRepository();
-	const taskBoardRepository = new TaskBoardRepository(Database.getInstance());
+	const userRepository = new UserRepository(db);
+	const taskBoardRepository = new TaskBoardRepository(db);
 
 	const taskBoardController = new TaskBoardController(
 		taskBoardRepository,

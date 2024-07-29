@@ -4,9 +4,12 @@ import { Server } from "socket.io";
 import http from "http";
 import { SocketService } from "./services/socketService";
 import createRouter from "./routes/routes";
+import Database from "./databases/database";
 
 const app = express();
 const server = http.createServer(app);
+const db = Database.getInstance();
+const router = createRouter(server, db);
 
 app.use(express.json());
 
@@ -16,8 +19,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-const router = createRouter(server);
 
 app.use("/", router);
 

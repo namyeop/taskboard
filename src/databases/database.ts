@@ -1,6 +1,5 @@
 // src/database/Database.ts
 import sqlite3 from "sqlite3";
-import { Task } from "@types-taskboard/taskboard";
 
 class Database {
 	private static instance: sqlite3.Database;
