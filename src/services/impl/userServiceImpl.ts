@@ -8,14 +8,10 @@ export class UserServiceImpl implements IUserService {
 	private jwtSecret: string;
 	private jwtRefreshSecret: string;
 
-	constructor(
-		userRepository: UserRepository,
-		jwtSecret: string,
-		jwtRefreshSecret: string,
-	) {
+	constructor(userRepository: UserRepository) {
 		this.userRepository = userRepository;
-		this.jwtSecret = jwtSecret;
-		this.jwtRefreshSecret = jwtRefreshSecret;
+		this.jwtSecret = jwtConfig.jwtSecret;
+		this.jwtRefreshSecret = jwtConfig.jwtRefreshSecret;
 	}
 
 	async createUser(user: {

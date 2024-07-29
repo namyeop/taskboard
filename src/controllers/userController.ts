@@ -1,17 +1,12 @@
 import { Request, Response } from "express";
 import { UserServiceImpl } from "../services/impl/userServiceImpl";
 import UserRepository from "../repositories/user.repository";
-import { jwtConfig } from "../config/config";
 
 export class UserController {
 	private userService: UserServiceImpl;
 
 	constructor(userRepository: UserRepository) {
-		this.userService = new UserServiceImpl(
-			userRepository,
-			jwtConfig.jwtSecret,
-			jwtConfig.jwtRefreshSecret,
-		);
+		this.userService = new UserServiceImpl(userRepository);
 	}
 
 	async createUser(req: Request, res: Response) {
