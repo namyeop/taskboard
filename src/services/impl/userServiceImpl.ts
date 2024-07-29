@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import IUserService from "../IUserService";
 import UserRepository from "../../repositories/user.repository";
+import { jwtConfig } from "../../config/config";
 
 export class UserServiceImpl implements IUserService {
 	private userRepository: UserRepository;
