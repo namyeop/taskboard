@@ -1,12 +1,15 @@
 import http from "http";
 import { Request, Response } from "express";
 import { TaskBoardServiceImpl } from "../services/impl/taskboardServiceImpl";
-
+import TaskBoardRepository from "../repositories/taskboard.repository";
 export class TaskBoardController {
 	private taskBoardService: TaskBoardServiceImpl;
 
-	constructor(server: http.Server) {
-		this.taskBoardService = new TaskBoardServiceImpl(server);
+	constructor(taskboardRepository: TaskBoardRepository, server: http.Server) {
+		this.taskBoardService = new TaskBoardServiceImpl(
+			taskboardRepository,
+			server,
+		);
 	}
 
 	async createTask(req: Request, res: Response) {

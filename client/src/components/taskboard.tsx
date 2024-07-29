@@ -26,18 +26,27 @@ const TaskBoard: React.FC = () => {
 			console.log("Connected to server");
 		});
 
-		axios.get("http://localhost:3000").then((res) => {
-			console.log(res.data);
-			if (res.data.length > 0) {
-				const tasksByStatus: { [key: string]: Task[] } = {};
-				res.data.forEach((task: Task) => {
-					if (tasksByStatus[task.status]) {
-						tasksByStatus[task.status].push(task);
-					}
-				});
-				setTasks(tasksByStatus);
-			}
-		});
+		axios
+			.get("http://localhost:3000", {
+				headers: {
+					Authorization: `Bearer ${localStorage.getItem("token")}`,
+				},
+			})
+			.then((res) => {
+				console.log(res.data);
+				if (res.data.length > 0) {
+					const tasksByStatus: { [key: string]: Task[] } = {};
+					res.data.forEach((task: Task) => {
+						if (tasksByStatus[task.status]) {
+							tasksByStatus[task.status].push(task);
+						}
+					});
+					setTasks(tasksByStatus);
+				}
+			})
+			.catch((error) => {
+				alert("로그인이 필요합니다." + error);
+			});
 
 		return () => {
 			socket.disconnect();

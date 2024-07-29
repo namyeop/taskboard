@@ -9,8 +9,8 @@ export class TaskBoardServiceImpl implements ITaskBoardService {
 	private io: Server;
 	private taskBoardRepository: TaskBoardRepository;
 
-	constructor(server: http.Server) {
-		this.taskBoardRepository = new TaskBoardRepository(Database.getInstance());
+	constructor(taskboardRepository: TaskBoardRepository, server: http.Server) {
+		this.taskBoardRepository = taskboardRepository;
 		this.io = new Server(server, {
 			cors: {
 				origin: "http://localhost:5173",
