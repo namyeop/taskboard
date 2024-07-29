@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Task } from "../types";
 
-const refreshToekn = () => {
+const refreshToken = () => {
 	const refreshToken = localStorage.getItem("refreshToken");
 	if (refreshToken) {
 		axios
@@ -11,7 +11,9 @@ const refreshToekn = () => {
 			.then((res) => {
 				if (res.status === 200) {
 					const token = res.data.token;
+					const refreshToken = res.data.refreshToken;
 					localStorage.setItem("token", token);
+					localStorage.setItem("refreshToken", refreshToken);
 				}
 			});
 	}
@@ -37,7 +39,7 @@ const getTasks = async (setTasks: React.SetStateAction) => {
 		},
 		(error) => {
 			if (error.response.status === 401) {
-				refreshToekn();
+				refreshToken();
 			}
 			return Promise.reject(error);
 		},
