@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "@tanstack/react-router";
 
 interface SignInProps {
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
@@ -8,6 +9,7 @@ interface SignInProps {
 const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
 	const [username, setUsername] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
+	const navigate = useNavigate();
 
 	const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(e.target.value);
@@ -34,6 +36,9 @@ const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
 					alert("로그인 성공!");
 				}
 				setIsLoggedIn(true);
+			})
+			.catch(() => {
+				alert("로그인 실패!");
 			});
 	};
 
@@ -73,6 +78,9 @@ const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
 					Login
 				</button>
 			</form>
+			<button onClick={() => navigate({ to: "/signup" })} className="mt-4">
+				Sign Up
+			</button>
 		</div>
 	);
 };

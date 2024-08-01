@@ -26,12 +26,14 @@ const TaskBoard: React.FC = () => {
 			console.log("Connected to server");
 		});
 
-		getTasks(setTasks);
+		if (isLoggedIn) {
+			getTasks(setTasks);
+		}
 
 		return () => {
 			socket.disconnect();
 		};
-	}, []);
+	}, [isLoggedIn]);
 
 	const addTask = (columnId: ColumnId): void => {
 		const taskText = prompt("Enter task description:");

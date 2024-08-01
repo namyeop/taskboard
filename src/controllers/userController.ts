@@ -25,11 +25,12 @@ export class UserController {
 	async loginUser(req: Request, res: Response) {
 		try {
 			const { username, password } = req.body;
-			this.userService.loginUser(username, password).then((token) => {
-				if (token) {
-					res.status(200).json({ token });
+			this.userService.loginUser(username, password).then((result) => {
+				if (result) {
+					const { token, refreshToken } = result;
+					res.status(200).json({ token, refreshToken });
 				} else {
-					res.status(401).json({ error: "Invalid credentials" });
+					res.status(401).json({ error: "Unauthorized" });
 				}
 			});
 		} catch (error) {

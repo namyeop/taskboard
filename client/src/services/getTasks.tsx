@@ -1,24 +1,6 @@
 import axios from "../utils/axiosConfig";
 import { Task } from "../types";
 
-const refreshToken = () => {
-	const refreshToken = localStorage.getItem("refreshToken");
-	if (refreshToken) {
-		axios
-			.post("http://localhost:3000/refreshToken", {
-				refreshToken,
-			})
-			.then((res) => {
-				if (res.status === 200) {
-					const token = res.data.token;
-					const refreshToken = res.data.refreshToken;
-					localStorage.setItem("token", token);
-					localStorage.setItem("refreshToken", refreshToken);
-				}
-			});
-	}
-};
-
 const getTasks = async (setTasks: React.SetStateAction) => {
 	try {
 		const res = await axios.get("http://localhost:3000");
@@ -32,25 +14,7 @@ const getTasks = async (setTasks: React.SetStateAction) => {
 			setTasks(tasksByStatus);
 		}
 	} catch (error) {
-		if (error.response.status === 401) {
-			try {
-				await refreshToken();
-				const res = await axios.get("http://localhost:3000");
-				if (res.data.length > 0) {
-					const tasksByStatus: { [key: string]: Task[] } = {};
-					res.data.forEach((task: Task) => {
-						if (tasksByStatus[task.status]) {
-							tasksByStatus[task.status].push(task);
-						}
-					});
-					setTasks(tasksByStatus);
-				}
-			} catch (retryError) {
-				alert("로그인이 필요합니다." + retryError);
-			}
-		} else {
-			alert("로그인이 필요합니다." + error);
-		}
+		return Promise.reject(error);
 	}
 };
 

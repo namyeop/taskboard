@@ -20,11 +20,16 @@ export class UserServiceImpl implements IUserService {
 	}): Promise<void> {
 		return this.userRepository.registerUser(user.username, user.password);
 	}
-	async loginUser(username: string, password: string): Promise<object | null> {
+
+	async loginUser(
+		username: string,
+		password: string,
+	): Promise<{ token: string; refreshToken: string } | null> {
 		const isAuthenticated = await this.userRepository.loginUser(
 			username,
 			password,
 		);
+
 		if (isAuthenticated) {
 			const token = jwt.sign({ username }, this.jwtSecret, {
 				expiresIn: "1h",
@@ -34,7 +39,8 @@ export class UserServiceImpl implements IUserService {
 			});
 
 			return { token, refreshToken };
+		} else {
+			return null;
 		}
-		return null;
 	}
 }
