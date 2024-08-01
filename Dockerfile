@@ -18,5 +18,5 @@ COPY --from=backend-build /app/dist ./dist
 COPY --from=backend-build /app/package*.json ./
 COPY --from=frontend-build /app/client/build ./client/build
 RUN npm install --only=production
-EXPOSE 5000
+EXPOSE 3000 5173
 CMD ["node", "dist/app.js"]

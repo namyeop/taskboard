@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: server-build
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    command: ["npm", "run", "dev"]
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: client-build
+    working_dir: /usr/src/app/client
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/client/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    command: ["npm", "run", "dev"]
