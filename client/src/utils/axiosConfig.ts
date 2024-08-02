@@ -1,16 +1,5 @@
 import axios from "axios";
 
-const isRefreshing = false;
-const refreshSubscribers: ((token: string) => void)[] = [];
-
-const onRrefreshed = (token: string) => {
-	refreshSubscribers.map((callback) => callback(token));
-};
-
-const addRefreshSubscriber = (callback: (token: string) => void) => {
-	refreshSubscribers.push(callback);
-};
-
 const refreshToken = async () => {
 	const refreshToken = localStorage.getItem("refreshToken");
 
@@ -32,7 +21,9 @@ const refreshToken = async () => {
 	}
 };
 
-axios.interceptors.request.use(
+const authAxios = axios.create();
+
+authAxios.interceptors.request.use(
 	(config) => {
 		const token = localStorage.getItem("token");
 		if (token) {
@@ -45,8 +36,7 @@ axios.interceptors.request.use(
 	},
 );
 
-// Response interceptor
-axios.interceptors.response.use(
+authAxios.interceptors.response.use(
 	(response) => {
 		return response;
 	},
@@ -58,25 +48,18 @@ axios.interceptors.response.use(
 		const originalRequest = config;
 
 		if (status === 401 && !originalRequest._retry) {
-			if (!isRefreshing) {
-				isRefreshing = true;
-				refreshToken().then((newToken) => {
-					isRefreshing = false;
-					onRrefreshed(newToken);
-					refreshSubscribers = [];
-				});
+			originalRequest._retry = true;
+			try {
+				const token = refreshToken();
+				originalRequest.headers.Authorization = "Bearer " + token;
+				return axios(originalRequest);
+			} catch (error) {
+				window.location.href = "/signin";
+				return Promise.reject(error);
 			}
-
-			const retryOriginalRequest = new Promise((resolve) => {
-				addRefreshSubscriber((token: string) => {
-					originalRequest.headers.Authorization = "Bearer " + token;
-					resolve(axios(originalRequest));
-				});
-			});
-			return retryOriginalRequest;
 		}
 		return Promise.reject(error);
 	},
 );
 
-export default axios;
+export default authAxios;

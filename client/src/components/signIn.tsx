@@ -1,15 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "@tanstack/react-router";
+import { useAuth } from "../hooks/useAuth";
 
 interface SignInProps {
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
+const SignIn: React.FC<SignInProps> = () => {
 	const [username, setUsername] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
+	const { isLoggedIn, setIsLoggedIn } = useAuth();
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+
+		if (token && isLoggedIn) {
+			setIsLoggedIn(true);
+			navigate({ to: "/" });
+		}
+	}, [isLoggedIn, setIsLoggedIn, navigate]);
 
 	const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(e.target.value);
@@ -34,8 +45,9 @@ const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
 					localStorage.setItem("token", token);
 					localStorage.setItem("refreshToken", refreshToken);
 					alert("로그인 성공!");
+					setIsLoggedIn(true);
+					navigate({ to: "/" });
 				}
-				setIsLoggedIn(true);
 			})
 			.catch(() => {
 				alert("로그인 실패!");
@@ -78,7 +90,7 @@ const SignIn: React.FC<SignInProps> = ({ setIsLoggedIn }) => {
 					Login
 				</button>
 			</form>
-			<button onClick={() => navigate({ to: "/signup" })} className="mt-4">
+			<button onClick={() => navigate({ to: "/signUp" })} className="mt-4">
 				Sign Up
 			</button>
 		</div>

@@ -31,8 +31,8 @@ export class TaskBoardServiceImpl implements ITaskBoardService {
 				this.updateTaskStatus(task.uuid, task.status);
 			});
 
-			socket.on("deleteTask", (uuid: string) => {
-				this.deleteTask(uuid);
+			socket.on("deleteTask", (task: Task) => {
+				this.deleteTask(task.uuid);
 			});
 		});
 	}

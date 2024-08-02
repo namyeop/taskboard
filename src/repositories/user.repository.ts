@@ -38,11 +38,19 @@ export default class UserRepository {
 					reject(err);
 				} else {
 					this.db.get(
-						"SELECT * FROM users WHERE username = ? AND password = ?",
-						[username, hash],
+						"SELECT * FROM users WHERE username = ?",
+						[username],
 						(err: Error | null, row: any) => {
 							if (err) {
 								reject(err);
+							} else if (row) {
+								bcrypt.compare(password, row.password, (err, result) => {
+									if (err) {
+										reject(err);
+									} else {
+										resolve(result);
+									}
+								});
 							} else {
 								resolve(row !== undefined);
 							}

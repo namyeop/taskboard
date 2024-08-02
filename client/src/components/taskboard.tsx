@@ -1,24 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { Task, ColumnId, Tasks, ColumnIds } from "../../../types/taskboard";
-import SignIn from "./signIn";
 import getTasks from "../services/getTasks";
+import { useNavigate } from "@tanstack/react-router";
+import { useAuth } from "../hooks/useAuth";
 
 const TaskBoard: React.FC = () => {
-	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+	const { isLoggedIn } = useAuth();
 	const [tasks, setTasks] = useState<Tasks>({
 		[ColumnIds.TODO]: [],
 		[ColumnIds.IN_PROGRESS]: [],
 		[ColumnIds.DONE]: [],
 	});
+	const navigate = useNavigate();
 
-	const socketRef = useRef(null);
+	const socketRef = useRef(null as Socket | null);
 	const draggedTask = useRef<{ task: Task; sourceColumn: ColumnId } | null>(
 		null,
 	);
 
 	useEffect(() => {
+		if (!isLoggedIn) {
+			navigate({ to: "/signIn" });
+		}
+
 		const socket = io("http://localhost:3000");
 		socketRef.current = socket;
 
@@ -26,14 +32,18 @@ const TaskBoard: React.FC = () => {
 			console.log("Connected to server");
 		});
 
-		if (isLoggedIn) {
-			getTasks(setTasks);
-		}
+		getTasks().then((tasks) => {
+			setTasks(() => ({
+				[ColumnIds.TODO]: tasks.todo ?? [],
+				[ColumnIds.IN_PROGRESS]: tasks.inProgress ?? [],
+				[ColumnIds.DONE]: tasks.done ?? [],
+			}));
+		});
 
 		return () => {
 			socket.disconnect();
 		};
-	}, [isLoggedIn]);
+	}, [isLoggedIn, navigate]);
 
 	const addTask = (columnId: ColumnId): void => {
 		const taskText = prompt("Enter task description:");
@@ -42,24 +52,28 @@ const TaskBoard: React.FC = () => {
 			const newTask = { uuid, taskText, status: columnId };
 			setTasks((prevTasks) => ({
 				...prevTasks,
-				[columnId]: [...prevTasks[columnId], newTask],
+				[columnId]: [...(prevTasks[columnId] ?? []), newTask],
 			}));
-			socketRef.current.emit("createTask", {
-				uuid,
-				taskText,
-				status: columnId,
-			});
+			if (socketRef.current) {
+				socketRef.current.emit("createTask", {
+					uuid,
+					taskText,
+					status: columnId,
+				});
+			}
 		}
 	};
 
 	const deleteTask = (task: Task, columnId: ColumnId) => {
+		if (socketRef.current) {
+			socketRef.current.emit("deleteTask", {
+				uuid: task.uuid,
+			});
+		}
 		setTasks((prevTasks) => ({
 			...prevTasks,
 			[columnId]: prevTasks[columnId].filter((t) => t.uuid !== task.uuid),
 		}));
-		socketRef.current.emit("deleteTask", {
-			uuid: task.uuid,
-		});
 	};
 
 	const onDragStart = (
@@ -92,12 +106,14 @@ const TaskBoard: React.FC = () => {
 					[sourceColumn]: prevTasks[sourceColumn].filter(
 						(t) => t.uuid !== task.uuid,
 					),
-					[targetColumn]: [...prevTasks[targetColumn], task],
+					[targetColumn]: [...(prevTasks[targetColumn] ?? []), task],
 				}));
-				socketRef.current.emit("updateTask", {
-					uuid: task.uuid,
-					status: targetColumn,
-				});
+				if (socketRef.current) {
+					socketRef.current.emit("updateTask", {
+						uuid: task.uuid,
+						status: targetColumn,
+					});
+				}
 			}
 			draggedTask.current = null;
 		}
@@ -132,10 +148,6 @@ const TaskBoard: React.FC = () => {
 			</button>
 		</div>
 	);
-
-	if (!isLoggedIn) {
-		return <SignIn setIsLoggedIn={setIsLoggedIn} />;
-	}
 
 	return (
 		<div data-testid="taskboard" className="max-w-6xl mx-auto">

@@ -51,7 +51,7 @@ const SignUp: React.FC = () => {
 			.then((res) => {
 				if (res.status === 201) {
 					alert("회원가입 성공!");
-					navigate({ to: "/login" });
+					navigate({ to: "/signIn" });
 				}
 			});
 	};

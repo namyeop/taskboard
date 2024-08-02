@@ -29,7 +29,6 @@ export class UserServiceImpl implements IUserService {
 			username,
 			password,
 		);
-
 		if (isAuthenticated) {
 			const token = jwt.sign({ username }, this.jwtSecret, {
 				expiresIn: "1h",
