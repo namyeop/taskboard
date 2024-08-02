@@ -1,22 +1,20 @@
-FROM node:22.5.1-bullseye-slim as build
+FROM node:22.5.1-bullseye-slim AS build
 WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm install
 
-FROM build as client-build
+FROM build AS client-build
 WORKDIR /usr/src/app/client
 COPY client/package*.json ./
 RUN npm install
 
-FROM build as server-build
+FROM build AS server-build
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 
 FROM node:22.5.1-bullseye-slim
 WORKDIR /usr/src/app
-COPY --from=client-build /usr/src/app/client/node_modules ./client/node_modules
 COPY --from=server-build /usr/src/app/node_modules ./node_modules
+COPY --from=client-build /usr/src/app/client/node_modules ./client/node_modules
 COPY . .
 
 EXPOSE 5000 3000

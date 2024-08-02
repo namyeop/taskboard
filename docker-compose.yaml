@@ -8,8 +8,8 @@ services:
       target: server-build
     working_dir: /usr/src/app
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules/
     ports:
       - "3000:3000"
     environment:
@@ -23,8 +23,8 @@ services:
       target: client-build
     working_dir: /usr/src/app/client
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/client/node_modules
+      - ./:/usr/src/app
+      - /usr/src/app/client/node_modules/
     ports:
       - "5173:5173"
     environment:
