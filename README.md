@@ -4,4 +4,26 @@ This is a simple taskboard application that allows you to create, edit, and dele
 
 ## Requirements
 
-- NodeJS > 22.5.0
+- node.js > 22.5.0
+
+## Installation
+
+- If you have node.js > 22.5.0,
+
+  - At root, run following commands:
+
+    ```sh
+    npm install
+    ```
+
+  - At /client,
+
+    ```sh
+    npm install
+    ```
+
+- If you want to use Docker, run following commands:
+
+  ```sh
+  docker compose up
+  ```
